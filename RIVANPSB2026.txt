@@ -1,6 +1,79 @@
 
 
 
+===============================
+DAY 4, 2026
+APRIL 30, 2026
+
+root
+zabbx
+http://208.8.8.134
+
+dnf install net-snmp-utils -y
+
+
+!@firewall1k
+conf t
+int g1
+ip addr dhcp
+no shut
+end
+
+sh ip int bri
+
+!@firewall1k
+snmpv2
+conf t
+access-list 10 permit 208.8.8.134
+snmp-server community public RO 10
+
+
+!@ScRTfirewall1k
+snmpv3
+conf t
+snmp-server group zabbix v3 priv
+snmp-server user admin zabbix v3 auth sha C1sc0123 priv aes 128 C1sc0123
+end
+
+
+!@VMzabbix
+sudo systemctl restart zabbix-server
+
+
+
+PARA HINDI MAG LOGOUT UNG SWITCH MO
+RUN THIS:
+conf t
+line vty 0 14
+exec-timeout 0 0
+login local
+end
+
+
+RADIUS [shell:priv-lvl=15]
+
+!@corebaba
+conf t
+username admin privilege 15 secret pass
+aaa new-model
+radius server WINRAD
+address ipv4 10.62.1.8 auth-port 1812 acct-port 1813 
+key aaaaaaaa
+aaa group server radius RADGROUP
+server name WINRAD
+exit
+aaa authentication login default group RADGROUP local
+aaa authorization exec default group RADGROUP local
+line vty 0 14
+login authentication default
+end
+
+!@RADIUS: remove config
+conf t
+no aaa new-model
+
+
+
 
 
 
